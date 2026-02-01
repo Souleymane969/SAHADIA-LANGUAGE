@@ -1,0 +1,11 @@
+# 🕊️ SAHADIA LANGUAGE
+# Standard Library (SSL)
+# v0.1
+
+SAHADIA_STDLIB = {
+    "math": {
+        "Square": lambda x: f"({x} * {x})",
+        "Cube": lambda x: f"({x} * {x} * {x})",
+        "Absolute": lambda x: f"abs({x})",
+    }
+}
