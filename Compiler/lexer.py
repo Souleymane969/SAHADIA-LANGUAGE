@@ -1,17 +1,12 @@
 # 🕊️ SAHADIA LANGUAGE
-# Lexer (Tokenizer)
-# Official Implementation v1.0
+# Lexer / Tokenizer
+# Official Implementation v1.1
 #
 # In memory of Sahadia.
 
 import re
 from dataclasses import dataclass
-from typing import List
 
-
-# =========================
-# TOKEN DEFINITION
-# =========================
 
 @dataclass
 class Token:
@@ -20,122 +15,104 @@ class Token:
     line: int
 
 
-# =========================
-# LEXER
-# =========================
+KEYWORDS = {
+    "Soul", "Say",
+    "Remember", "as",
+    "Ask", "into",
+    "IfSoul", "ElseSoul", "EndIf",
+    "RepeatSoul", "times", "EndRepeat",
+    "Use", "Return",
+    "of"
+}
+
+OPERATORS = {
+    "plus", "minus", "fois", "divided", "power"
+}
+
+COMPARATORS = {
+    "above", "greater",
+    "below", "less",
+    "equal", "same",
+    "not", "different"
+}
+
 
 class SahadiaLexer:
-    def __init__(self, source_code: str):
-        self.source = source_code.splitlines()
-        self.tokens: List[Token] = []
-        self.line_number = 0
+    def __init__(self, source: str):
+        self.source = source
+        self.position = 0
+        self.line = 1
+        self.tokens = []
 
-    # -------------------------
-    # KEYWORDS
-    # -------------------------
-    KEYWORDS = {
-        "BeginSoul", "EndSoul",
-        "Soul", "Say",
-        "Remember", "as",
-        "Count",
-        "Ask", "into",
-        "IfSoul", "ElseSoul", "EndIf",
-        "RepeatSoul", "times", "EndRepeat",
-        "Create", "EndCreate",
-        "Build", "EndBuild",
-        "WaitSoul",
-        "Use",
-        "Function", "of", "EndFunction",
-        "Return"
-    }
+    def tokenize(self):
+        while self.position < len(self.source):
+            char = self.source[self.position]
 
-    OPERATORS = {
-        "plus", "minus", "fois", "divided", "power"
-    }
+            if char in " \t":
+                self.position += 1
+                continue
 
-    COMPARATORS = {
-        "above", "greater",
-        "below", "less",
-        "equal", "same",
-        "not", "different"
-    }
+            if char == "\n":
+                self.line += 1
+                self.position += 1
+                continue
 
-    # -------------------------
-    # MAIN ENTRY
-    # -------------------------
-    def tokenize(self) -> List[Token]:
-        for line in self.source:
-            self.line_number += 1
-            self._tokenize_line(line)
+            if char == '"':
+                self.tokens.append(self.read_string())
+                continue
 
-        self.tokens.append(Token("EOF", "", self.line_number))
+            if char.isdigit():
+                self.tokens.append(self.read_number())
+                continue
+
+            if char.isalpha():
+                self.tokens.append(self.read_word())
+                continue
+
+            self.error(f"Unexpected character '{char}'")
+
+        self.tokens.append(Token("EOF", "EOF", self.line))
         return self.tokens
 
-    # -------------------------
-    # LINE TOKENIZATION
-    # -------------------------
-    def _tokenize_line(self, line: str):
-        stripped = line.strip()
+    # ==================
+    # READERS
+    # ==================
 
-        # Ignore empty lines
-        if not stripped:
-            return
+    def read_string(self):
+        self.position += 1
+        start = self.position
+        while self.position < len(self.source) and self.source[self.position] != '"':
+            self.position += 1
+        value = self.source[start:self.position]
+        self.position += 1
+        return Token("STRING", value, self.line)
 
-        # Ignore comments
-        if stripped.startswith("#"):
-            return
+    def read_number(self):
+        start = self.position
+        while self.position < len(self.source) and (
+            self.source[self.position].isdigit() or self.source[self.position] == "."
+        ):
+            self.position += 1
+        return Token("NUMBER", self.source[start:self.position], self.line)
 
-        # String literals
-        string_matches = re.finditer(r'"([^"]*)"', line)
-        strings = {}
-        for i, match in enumerate(string_matches):
-            placeholder = f"__STRING{i}__"
-            strings[placeholder] = match.group(1)
-            line = line.replace(match.group(0), placeholder)
+    def read_word(self):
+        start = self.position
+        while self.position < len(self.source) and self.source[self.position].isalnum():
+            self.position += 1
+        value = self.source[start:self.position]
 
-        parts = line.strip().split()
+        if value in KEYWORDS:
+            return Token("KEYWORD", value, self.line)
+        if value in OPERATORS:
+            return Token("OPERATOR", value, self.line)
+        if value in COMPARATORS:
+            return Token("COMPARATOR", value, self.line)
 
-        for part in parts:
-            # Restore string
-            if part in strings:
-                self.tokens.append(Token("STRING", strings[part], self.line_number))
-                continue
+        return Token("IDENTIFIER", value, self.line)
 
-            # Keyword
-            if part in self.KEYWORDS:
-                self.tokens.append(Token("KEYWORD", part, self.line_number))
-                continue
+    # ==================
+    # ERROR
+    # ==================
 
-            # Operator
-            if part in self.OPERATORS:
-                self.tokens.append(Token("OPERATOR", part, self.line_number))
-                continue
-
-            # Comparator
-            if part in self.COMPARATORS:
-                self.tokens.append(Token("COMPARATOR", part, self.line_number))
-                continue
-
-            # Number
-            if self._is_number(part):
-                self.tokens.append(Token("NUMBER", part, self.line_number))
-                continue
-
-            # Identifier
-            if part.isidentifier():
-                self.tokens.append(Token("IDENTIFIER", part, self.line_number))
-                continue
-
-            # Unknown token
-            self.tokens.append(Token("UNKNOWN", part, self.line_number))
-
-    # -------------------------
-    # HELPERS
-    # -------------------------
-    @staticmethod
-    def _is_number(value: str) -> bool:
-        try:
-            float(value)
-            return True
-        except ValueError:
-            return False
+    def error(self, message):
+        raise SyntaxError(f"[Line {self.line}] {message}")
