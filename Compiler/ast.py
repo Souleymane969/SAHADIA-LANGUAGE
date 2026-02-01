@@ -1,19 +1,14 @@
 # 🕊️ SAHADIA LANGUAGE
 # Abstract Syntax Tree (AST)
-# Official Definition v1.0
+# Official Definition v1.1
 #
 # In memory of Sahadia.
 
 from dataclasses import dataclass
-from typing import List, Optional, Any
+from typing import List, Optional
 
-
-# =========================
-# BASE NODES
-# =========================
 
 class ASTNode:
-    """Base class for all AST nodes."""
     pass
 
 
@@ -22,9 +17,9 @@ class ProgramNode(ASTNode):
     statements: List[ASTNode]
 
 
-# =========================
+# ============
 # EXPRESSIONS
-# =========================
+# ============
 
 @dataclass
 class NumberNode(ASTNode):
@@ -48,9 +43,15 @@ class BinaryExpressionNode(ASTNode):
     right: ASTNode
 
 
-# =========================
+@dataclass
+class FunctionCallNode(ASTNode):
+    name: str
+    arguments: List[ASTNode]
+
+
+# ============
 # STATEMENTS
-# =========================
+# ============
 
 @dataclass
 class SoulNode(ASTNode):
@@ -87,9 +88,10 @@ class RepeatNode(ASTNode):
     body: List[ASTNode]
 
 
-# =========================
-# FUNCTIONS & LIBRARIES
-# =========================
+@dataclass
+class UseNode(ASTNode):
+    library_name: str
+
 
 @dataclass
 class FunctionNode(ASTNode):
@@ -100,25 +102,4 @@ class FunctionNode(ASTNode):
 
 @dataclass
 class ReturnNode(ASTNode):
-    value: Optional[ASTNode]
-
-
-@dataclass
-class UseNode(ASTNode):
-    library_name: str
-
-
-# =========================
-# BUILD / CREATE (EXTENSIBLE)
-# =========================
-
-@dataclass
-class BuildNode(ASTNode):
-    target: str
-    body: List[ASTNode]
-
-
-@dataclass
-class CreateNode(ASTNode):
-    target: str
-    body: List[ASTNode]
+    value: ASTNode
