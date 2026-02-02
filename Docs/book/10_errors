@@ -1,0 +1,41 @@
+# Chapitre 10  
+## Erreurs — Comprendre sans peur  
+*Messages clairs, récupération, sérénité*
+
+Faire des erreurs est normal.
+C’est ainsi que l’on apprend.
+C’est ainsi que l’on progresse.
+
+SAHADIA ne considère pas les erreurs
+comme des fautes,
+mais comme des **moments d’explication**.
+
+---
+
+## 1. La philosophie de l’erreur en SAHADIA
+
+Dans SAHADIA :
+- une erreur n’est jamais violente
+- elle est expliquée clairement
+- elle aide à corriger
+
+Le langage est un guide,
+pas un juge.
+
+---
+
+## 2. Qu’est-ce qu’une erreur ?
+
+Une erreur apparaît lorsque :
+- une valeur est absente
+- une opération est impossible
+- une règle n’est pas respectée
+
+Exemples simples :
+- utiliser une variable non définie
+- accéder à un champ inexistant
+- diviser par zéro
+
+---
+
+## 3. Exemple d’erreur simple
